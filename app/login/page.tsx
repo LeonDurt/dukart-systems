@@ -25,19 +25,34 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Login fehlgeschlagen.");
+      setError("Login fehlgeschlagen. Bitte E-Mail und Passwort prüfen.");
       return;
     }
 
-    router.push("/admin/orders");
+    // Rolle aus der Session lesen für Weiterleitung
+    const sessionRes = await fetch("/api/auth/session");
+    const sessionData = await sessionRes.json();
+    const role = sessionData?.user?.role;
+
+    if (role === "CUSTOMER") {
+      router.push("/kundenportal");
+    } else {
+      router.push("/admin/orders");
+    }
   }
 
   return (
     <main className="min-h-screen bg-slate-950 text-white flex items-center justify-center px-6">
       <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl">
-        <h1 className="text-3xl font-bold">Login</h1>
-        <p className="mt-2 text-slate-300">
-          Melde dich an, um auf das Portal zuzugreifen.
+        <div className="mb-4 flex items-center justify-between">
+          <div className="text-xs font-semibold tracking-widest text-slate-500 uppercase">Dukart Systems</div>
+          <a href="/" className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400 transition hover:border-cyan-300/40 hover:text-white">
+            ← Zurück zur Webseite
+          </a>
+        </div>
+        <h1 className="text-3xl font-bold">Dukarts Panel</h1>
+        <p className="mt-2 text-slate-400">
+          Melde dich an, um auf das Panel zuzugreifen.
         </p>
 
         <form onSubmit={handleLogin} className="mt-8 space-y-4">
@@ -72,6 +87,12 @@ export default function LoginPage() {
           </button>
 
           {error && <p className="text-sm text-red-400">{error}</p>}
+
+          <div className="text-center">
+            <a href="/forgot-password" className="text-xs text-slate-500 hover:text-cyan-300 transition">
+              Passwort vergessen?
+            </a>
+          </div>
         </form>
       </div>
     </main>

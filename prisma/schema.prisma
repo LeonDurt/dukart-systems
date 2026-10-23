@@ -20,6 +20,13 @@ enum Role {
   ADMIN
 }
 
+enum StaffStatus {
+  AVAILABLE
+  BUSY
+  BREAK
+  OFFLINE
+}
+
 enum ContactRequestStatus {
   NEW
   IN_REVIEW
@@ -53,6 +60,31 @@ enum DocumentType {
   OTHER
 }
 
+enum InvoiceType {
+  INVOICE
+  QUOTE
+}
+
+enum QuoteStatus {
+  OPEN
+  ACCEPTED
+  REJECTED
+}
+
+enum BillingDocType {
+  INVOICE
+  DELIVERY_NOTE
+  DUNNING
+}
+
+enum BillingStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
 model User {
   id             String   @id @default(cuid())
   email          String   @unique
@@ -69,9 +101,13 @@ model User {
   createdOrders  Order[]  @relation("CreatedOrders")
   assignedOrders Order[]  @relation("AssignedOrders")
 
-  orderUpdates   OrderUpdate[]
-  documents      Document[]
-  invitations    Invitation[] @relation("CreatedInvitations")
+  orderUpdates        OrderUpdate[]
+  documents           Document[]
+  invitations         Invitation[] @relation("CreatedInvitations")
+  chatMessages        ChatMessage[]
+  passwordResetTokens PasswordResetToken[]
+  createdInvoices     Invoice[]    @relation("CreatedInvoices")
+  billingDocs         BillingDocument[] @relation("BillingDocs")
 }
 
 model Customer {
@@ -94,17 +130,19 @@ model Customer {
   user              User?    @relation(fields: [userId], references: [id])
   invitations       Invitation[]
   orders            Order[]
+  maintenanceContracts MaintenanceContract[]
 }
 
 model StaffProfile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
+  id          String      @id @default(cuid())
+  userId      String      @unique
   displayName String
   position    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      StaffStatus @default(OFFLINE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
 }
 
 model Invitation {
@@ -117,7 +155,7 @@ model Invitation {
   createdByUserId String
   createdAt       DateTime @default(now())
 
-  customer        Customer @relation(fields: [customerId], references: [id])
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   createdByUser   User     @relation("CreatedInvitations", fields: [createdByUserId], references: [id])
 }
 
@@ -125,6 +163,7 @@ model ContactRequest {
   id                    String               @id @default(cuid())
   name                  String
   contact               String
+  phone                 String?
   subject               String
   message               String
   status                ContactRequestStatus @default(NEW)
@@ -147,18 +186,35 @@ model Order {
   shippingStatus          String?
   isCompleted             Boolean         @default(false)
   completedAt             DateTime?
+  isArchived              Boolean         @default(false)
+  archivedAt              DateTime?
   createdByUserId         String
   assignedToUserId        String?
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
 
-  customer                Customer        @relation(fields: [customerId], references: [id])
+  customer                Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
   createdByUser           User            @relation("CreatedOrders", fields: [createdByUserId], references: [id])
   assignedToUser          User?           @relation("AssignedOrders", fields: [assignedToUserId], references: [id])
 
   parts                   OrderPart[]
   updates                 OrderUpdate[]
   documents               Document[]
+  chatMessages            ChatMessage[]
+  invoices                Invoice[]
+  appointments            OrderAppointment[]
+}
+
+model OrderAppointment {
+  id          String   @id @default(cuid())
+  orderId     String
+  title       String
+  date        DateTime
+  notes       String?
+  calendarUid String?
+  createdAt   DateTime @default(now())
+
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderPart {
@@ -178,7 +234,7 @@ model OrderPart {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  order        Order    @relation(fields: [orderId], references: [id])
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderUpdate {
@@ -190,7 +246,7 @@ model OrderUpdate {
   isVisibleToCustomer Boolean  @default(true)
   createdAt           DateTime @default(now())
 
-  order               Order    @relation(fields: [orderId], references: [id])
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   authorUser          User     @relation(fields: [authorUserId], references: [id])
 }
 
@@ -205,6 +261,150 @@ model Document {
   isVisibleToCustomer Boolean      @default(false)
   createdAt           DateTime     @default(now())
 
-  order               Order        @relation(fields: [orderId], references: [id])
+  order               Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
   uploadedByUser      User         @relation(fields: [uploadedByUserId], references: [id])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  orderId   String
+  userId    String
+  message   String
+  createdAt DateTime @default(now())
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  rating      Int
+  text        String
+  isApproved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Invoice {
+  id                String       @id @default(cuid())
+  orderId           String
+  type              InvoiceType
+  number            String       @unique
+  createdByUserId   String
+  items             Json
+  total             Decimal      @db.Decimal(10, 2)
+  notes             String?
+  isSentToCustomer  Boolean      @default(false)
+  sentAt            DateTime?
+  dueDate           DateTime?
+  quoteStatus       QuoteStatus? @default(OPEN)
+  expiresAt         DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  order             Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdByUser     User        @relation("CreatedInvoices", fields: [createdByUserId], references: [id])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  userAgent String?
+  ip        String?
+  referer   String?
+  createdAt DateTime @default(now())
+}
+
+model ConfiguratorBuild {
+  id           String   @id @default(cuid())
+  useCase      String
+  budget       String
+  cpu          String
+  gpu          String
+  ram          String
+  storage      String
+  cooling      String
+  pcCase       String
+  psu          String
+  priceRange   String
+  servicePrice String
+  note         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([useCase, budget])
+}
+
+model MaintenanceContract {
+  id              String    @id @default(cuid())
+  customerId      String
+  title           String
+  description     String?
+  intervalMonths  Int       @default(12)
+  lastServiceDate DateTime?
+  nextServiceDate DateTime
+  notes           String?
+  isActive        Boolean   @default(true)
+  reminderSentAt  DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  customer        Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+model BillingDocument {
+  id               String          @id @default(cuid())
+  type             BillingDocType
+  number           String          @unique
+  status           BillingStatus   @default(DRAFT)
+
+  recipientName    String
+  recipientCompany String?
+  recipientStreet  String?
+  recipientZip     String?
+  recipientCity    String?
+  recipientEmail   String?
+
+  items            Json
+  total            Decimal         @db.Decimal(10, 2)
+  notes            String?
+
+  issueDate        DateTime        @default(now())
+  dueDate          DateTime?
+  deliveryDate     DateTime?
+
+  relatedInvoiceId String?
+  relatedInvoice   BillingDocument?  @relation("Dunning", fields: [relatedInvoiceId], references: [id])
+  dunnings         BillingDocument[] @relation("Dunning")
+
+  createdByUserId  String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  createdByUser    User            @relation("BillingDocs", fields: [createdByUserId], references: [id])
+}
+
+model WiderrufRequest {
+  id                  String   @id @default(cuid())
+  firstName           String
+  lastName            String
+  email               String
+  orderNumber         String?
+  contractDescription String
+  confirmedAt         DateTime @default(now())
+  emailSentAt         DateTime?
+  createdAt           DateTime @default(now())
 }
