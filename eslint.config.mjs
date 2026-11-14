@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Eigenständige App mit eigenem Projekt, gehört nicht zur Webseite:
+    "fangen-app/**",
   ]),
 ]);
 

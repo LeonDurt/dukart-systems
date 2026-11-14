@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+html,
+body {
+  margin: 0;
+  background: #09090b;
+}
+
+/* Styles, die Tailwind nicht abdeckt: Leaflet Marker, Animationen, Safe Areas. */
+
+.fangen {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fangen .display {
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.fangen .safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+.fangen .safe-top {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+
+/* Warnweste: das Streifenmuster der Leibchen als wiederkehrendes Motiv */
+.fangen .vest-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgb(249 115 22) 0 14px,
+    rgb(24 24 27) 14px 28px
+  );
+}
+
+/* ── Karte ── */
+.fangen .leaflet-container {
+  background: #d4d4d8;
+  font: inherit;
+  z-index: 0;
+}
+
+.fangen .leaflet-control-attribution {
+  font-size: 10px;
+  background: rgb(255 255 255 / 0.75);
+}
+
+.fangen .fg-marker {
+  background: none;
+  border: 0;
+}
+
+.fangen .fg-me {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 6px rgb(0 0 0 / 0.5);
+}
+
+.fangen .fg-me::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  animation: fg-ping 2s ease-out infinite;
+}
+
+.fangen .fg-me.runner { background: #65a30d; color: #65a30d; }
+.fangen .fg-me.catcher { background: #f97316; color: #f97316; }
+.fangen .fg-me.neutral { background: #2563eb; color: #2563eb; }
+
+.fangen .fg-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.fangen .fg-pin-dot {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 1px 6px rgb(0 0 0 / 0.5);
+}
+
+.fangen .fg-pin.catcher .fg-pin-dot { background: #f97316; }
+.fangen .fg-pin.catcher.novest .fg-pin-dot { background: #a1a1aa; border-style: dashed; }
+
+.fangen .fg-pin.signal .fg-pin-dot {
+  position: relative;
+  background: #dc2626;
+}
+
+.fangen .fg-pin.signal .fg-pin-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  border: 3px solid #dc2626;
+  animation: fg-ping 1.6s ease-out infinite;
+}
+
+.fangen .fg-pin-label {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgb(9 9 11 / 0.85);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.fangen .fg-box {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 2px solid #18181b;
+  background: #facc15;
+  color: #18181b;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.45);
+}
+
+.fangen .fg-box.target {
+  outline: 3px solid #f97316;
+  outline-offset: 3px;
+  animation: fg-bounce 1s ease-in-out infinite;
+}
+
+.fangen .fg-vertex {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 3px solid #18181b;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+}
+
+@keyframes fg-ping {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes fg-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes fg-story {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes fg-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fangen .fg-rise { animation: fg-rise 0.35s ease-out both; }
+
+.fangen .fg-alarm { animation: fg-alarm 1s steps(2, jump-none) infinite; }
+
+@keyframes fg-alarm {
+  0% { background-color: rgb(220 38 38); }
+  100% { background-color: rgb(153 27 27); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fangen *,
+  .fangen *::before,
+  .fangen *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
