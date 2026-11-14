@@ -34,3 +34,22 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## FANGEN (Prototyp unter `/fangen`)
+
+Community Spiel: Fangen in einer festgelegten Zone, bis zu vier Stunden, mit Livekarte.
+Läuft komplett im Browser, Mitspieler brauchen kein Konto.
+
+- Seiten: `app/fangen` (Startseite) und `app/fangen/[code]` (Lobby, Spiel, Auswertung)
+- API: `app/api/fangen/games/...` (anlegen, beitreten, `sync`, `action`, `chat`)
+- Logik: `lib/fangen` (Spieluhr, Signal, Sichtbarkeit der Standorte, Geo Helfer)
+- Datenbank: Tabellen `TagGame`, `TagPlayer`, `TagBox`, `TagMessage`, `TagEvent`.
+  Einspielen mit `npx prisma migrate deploy`.
+- Erklärvideo: Umgebungsvariable `FANGEN_VIDEO_URL` auf eine Videodatei setzen
+  (z. B. `/fangen/erklaervideo.mp4` in `public`). Ohne Video läuft die animierte Regel Story.
+- Karte: OpenStreetMap Kacheln über Leaflet. Für viele Spieler später einen eigenen
+  Kachelanbieter eintragen (`app/fangen/_components/GameMap.tsx`).
+
+Bekannte Grenze: Ein Browser meldet den Standort nur, solange die Seite offen und der
+Bildschirm an ist. Die App hält den Bildschirm deshalb wach. Für Standort im Hintergrund
+braucht es eine native App (z. B. als Capacitor Hülle um diese Seiten).
