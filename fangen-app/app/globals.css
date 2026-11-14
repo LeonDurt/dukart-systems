@@ -191,3 +191,10 @@ body {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* In der installierten App braucht niemand mehr die Installationsanleitung. */
+@media (display-mode: standalone) {
+  .fangen .install-hint {
+    display: none;
+  }
+}

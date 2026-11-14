@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Vier Stunden, eine Zone, ein Fänger. Triff dich mit Leuten aus deiner Umgebung und spielt Fangen in der ganzen Stadt.",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  icons: { icon: "/icon.svg", apple: "/apple-touch-icon.png" },
   appleWebApp: { capable: true, title: "FANGEN", statusBarStyle: "black-translucent" },
   openGraph: {
     title: "FANGEN. Das Stadtspiel",

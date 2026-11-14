@@ -44,6 +44,13 @@ Der einfachste Weg ohne eigene Domain ist ein Tunnel:
 Der Computer muss während des ganzen Spiels an bleiben und online sein. Die Tunnel Adresse ändert sich bei
 jedem Start.
 
+## Als App auf dem Handy
+
+FANGEN lässt sich wie eine App installieren, sobald es unter einer `https` Adresse erreichbar ist:
+auf dem iPhone in Safari über Teilen und „Zum Home-Bildschirm“, auf Android über den Knopf
+„App installieren“ auf der Startseite. Danach hat es ein eigenes Symbol und läuft im Vollbild.
+Die App braucht trotzdem immer den Computer oder Server, auf dem sie gestartet wurde.
+
 ## Erklärvideo
 
 Lege ein Video als `public/erklaervideo.mp4` ab und starte die App neu. Es läuft dann vor den Regeln,

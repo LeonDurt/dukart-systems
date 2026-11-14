@@ -1,3 +1,4 @@
+import InstallHint from "./_components/InstallHint";
 import { RULES } from "./_components/rules";
 import StartForms from "./_components/StartForms";
 
@@ -44,6 +45,8 @@ export default function FangenHome() {
           ))}
         </ol>
       </section>
+
+      <InstallHint />
 
       <section className="px-5 pb-16 pt-12">
         <h2 className="text-xs font-bold uppercase tracking-[0.25em] text-zinc-400">Die Regeln</h2>
