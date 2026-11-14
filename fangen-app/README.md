@@ -44,6 +44,26 @@ Der einfachste Weg ohne eigene Domain ist ein Tunnel:
 Der Computer muss während des ganzen Spiels an bleiben und online sein. Die Tunnel Adresse ändert sich bei
 jedem Start.
 
+## Im Internet hosten (ohne eigenen Computer)
+
+Jeder Dienst, der eine Node.js App dauerhaft laufen lässt, funktioniert. Einstellungen am Beispiel Render
+(„New“, dann „Web Service“, dieses Repo auswählen):
+
+| Feld | Wert |
+| --- | --- |
+| Branch | `claude/community-fangen-game-app-q336w7` |
+| Root Directory | `fangen-app` |
+| Build Command | `npm install && npm run build` |
+| Start Command | `npm run start` |
+| Instance Type | Free |
+
+Die App liest den Port aus der Umgebungsvariable `PORT`, mehr ist nicht einzustellen. Kostenlose Instanzen
+schlafen nach einer Weile ohne Zugriffe ein und vergessen dabei laufende Spiele. Während eines Spiels
+passiert das nicht, weil die Handys alle paar Sekunden anfragen.
+
+Dienste ohne dauerhaft laufenden Prozess (zum Beispiel Vercel oder Netlify) eignen sich nicht, weil der
+Spielstand im Arbeitsspeicher liegt.
+
 ## Als App auf dem Handy
 
 FANGEN lässt sich wie eine App installieren, sobald es unter einer `https` Adresse erreichbar ist:
